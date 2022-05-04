@@ -1,7 +1,18 @@
+from distutils.command.upload import upload
+import uuid
+import os
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
 from user.managers import UserManager
+
+
+def menu_image_file_path(instance, filename):
+    """Generate file path for new menu image"""
+    ext = filename.split('.')[-1]
+    filename = f'{uuid.uuid4()}.{ext}'
+
+    return os.path.join('uploads/menu/', filename)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -51,6 +62,7 @@ class Menu(models.Model):
         choices=DAY_OF_WEEK_CHOICES,
         default=MONDAY
     )
+    image = models.ImageField(null=True, upload_to=menu_image_file_path)
 
     def __str__(self):
         return f'{self.restaurant.name}, {self.menu_day}'

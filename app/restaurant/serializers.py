@@ -17,5 +17,19 @@ class MenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Menu
-        fields = ('id', 'restaurant', 'menu_day')
+        fields = ('id', 'restaurant', 'menu_day', 'image')
+        read_only_fields = ('id',)
+
+
+class MenuDetailSerializer(MenuSerializer):
+    """Serialize a menu detail"""
+    restaurant = RestaurantSerializer(read_only=True)
+
+
+class MenuImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading images to menu"""
+
+    class Meta:
+        model = Menu
+        fields = ('id', 'image')
         read_only_fields = ('id',)

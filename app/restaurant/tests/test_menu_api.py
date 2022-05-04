@@ -10,8 +10,7 @@ from core.models import Restaurant, Menu
 from restaurant.serializers import MenuSerializer
 
 
-MENU_LIST_URL = reverse('restaurant:menu-list')
-MENU_CREATE_URL = reverse('restaurant:menu-create')
+MENU_URL = reverse('restaurant:menu-list')
 
 
 def sample_restaurant(name):
@@ -34,7 +33,7 @@ class PublicMenuAPITests(TestCase):
 
     def test_login_required_to_list(self):
         """Test that authentication is required to list menu objects"""
-        res = self.client.get(MENU_LIST_URL)
+        res = self.client.get(MENU_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -56,7 +55,13 @@ class PrivateMenuAPITests(TestCase):
         sample_menu(restaurant=self.restaurant, menu_day='M')
         sample_menu(restaurant=self.restaurant, menu_day='T')
 
-        res = self.client.get(MENU_LIST_URL)
+        superuser = create_superuser(
+            email='admin@admin.com',
+            password='admin'
+        )
+        self.client.force_authenticate(superuser)
+
+        res = self.client.get(MENU_URL)
 
         menus = Menu.objects.all()
         serializer = MenuSerializer(menus, many=True)
@@ -70,7 +75,7 @@ class PrivateMenuAPITests(TestCase):
             'restaurant': self.restaurant,
             'menu_day': 'TH'
         }
-        res = self.client.post(MENU_CREATE_URL, payload)
+        res = self.client.post(MENU_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -85,6 +90,6 @@ class PrivateMenuAPITests(TestCase):
             password='admin'
         )
         self.client.force_authenticate(superuser)
-        res = self.client.post(MENU_CREATE_URL, payload)
+        res = self.client.post(MENU_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
