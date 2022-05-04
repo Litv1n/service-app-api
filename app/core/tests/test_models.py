@@ -44,3 +44,10 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_restaurant_str(self):
+        """Test the restaurant string representation"""
+        restaurant = models.Restaurant.objects.create(
+            name='85C Bakery Cafe'
+        )
+        self.assertEqual(str(restaurant), restaurant.name)

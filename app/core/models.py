@@ -14,3 +14,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'email'
+
+
+class Restaurant(models.Model):
+    """Restaurant object"""
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
