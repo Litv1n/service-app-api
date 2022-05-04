@@ -80,7 +80,7 @@ class PrivateRestaurantAPITests(TestCase):
         exists = Restaurant.objects.filter(name=payload['name']).exists()
         self.assertTrue(exists)
 
-    def test_invalid_restaurant_fails(self):
+    def test_create_invalid_restaurant_fails(self):
         """Test creating invalid restaurant fails"""
         superuser = create_superuser(email='admin@admin.com', password='admin')
         self.client.force_authenticate(superuser)
