@@ -76,8 +76,13 @@ class MenuViewSet(viewsets.ModelViewSet):
 class ListCurrentDayMenu(ListMenuView):
     """List menus for the current day"""
 
-    # lookup_kwarg = 'menu_day'
-
     def get_queryset(self):
         day = self.kwargs['day']
         return self.queryset.filter(menu_day=day)
+
+
+class MenuEmployeeDetailView(generics.RetrieveAPIView):
+    authentication_classes = (TokenAuthentication, )
+    permissions_classes = (IsAuthenticated, )
+    queryset = Menu.objects.all()
+    serializer_class = serializers.MenuDetailSerializer
