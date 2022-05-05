@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import ListRestaurantView, CreateRestaurantView, ListMenuView,  MenuViewSet
+from .views import ListRestaurantView, CreateRestaurantView, ListMenuView,  MenuViewSet, ListCurrentDayMenu
 from rest_framework.routers import DefaultRouter
 
 
@@ -13,7 +13,7 @@ urlpatterns = [
     path('restaurant-create', CreateRestaurantView.as_view(),
          name='restaurant-create'),
     path('employee/menu-list', ListMenuView.as_view(), name='menu-list'),
-    # path('menu-create', CreateMenuView.as_view(), name='menu-create'),
-    # path('menu-retrieve/<int:id>', DetailMenuView.as_view(), name='menu-retrieve'),
+    path('employee/current-day-menu/<str:day>',
+         ListCurrentDayMenu.as_view(), name='current-day-menu'),
     path('', include(router.urls))
 ]
