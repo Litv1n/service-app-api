@@ -1,3 +1,4 @@
+from random import sample
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -6,21 +7,21 @@ from django.test import TestCase
 from django.urls import reverse
 
 from core.models import Restaurant, Menu
-
-from restaurant.serializers import MenuSerializer, MenuDetailSerializer
-
-
-MENU_URL = reverse('restaurant:menu-list')
+from menu.serializers import MenuSerializer, MenuDetailSerializer
 
 
-def detail_url_employee(menu_id):
+MENU_URL = reverse('menu:menu-list')
+VOTE_URL = reverse('menu:menu-vote')
+
+
+def detail_url(menu_id):
     """Return menu detail for the employee"""
-    return reverse('restaurant:menu-detail-employee', args=[menu_id])
+    return reverse('menu:menu-detail-view', args=[menu_id])
 
 
 def detail_url_current_day(current_day):
     """Return current day menu detail url"""
-    return reverse('restaurant:current-day-menu', args=[current_day])
+    return reverse('menu:current-day-menu', args=[current_day])
 
 
 def sample_restaurant(name):
@@ -59,6 +60,7 @@ class PrivateMenuAPITests(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.restaurant = sample_restaurant(name='Panda Express')
+        self.menu = sample_menu(restaurant=self.restaurant, menu_day='W')
 
     def test_retrieve_menus(self):
         """Test retrieving a list of menus"""
@@ -73,7 +75,7 @@ class PrivateMenuAPITests(TestCase):
 
         res = self.client.get(MENU_URL)
 
-        menus = Menu.objects.all()
+        menus = Menu.objects.all().order_by('-id')
         serializer = MenuSerializer(menus, many=True)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
@@ -104,32 +106,28 @@ class PrivateMenuAPITests(TestCase):
 
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_current_day_menu(self):
-        """Test get current day menu"""
-
-        MONDAY = 'M'
-
-        restaurant1 = sample_restaurant(name='Harvey"s')
-        restaurant2 = sample_restaurant(name='IHOP')
-        sample_menu(restaurant=restaurant1, menu_day=MONDAY)
-        sample_menu(restaurant=restaurant2, menu_day=MONDAY)
-        url = detail_url_current_day(MONDAY)
-
-        res = self.client.get(url)
-
-        menus = Menu.objects.all()
-        serializer = MenuSerializer(menus, many=True)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
-
     def test_menu_detail_employee(self):
         """Test detail menu view for employees"""
         restaurant = sample_restaurant(name='IHOP')
         menu = sample_menu(restaurant=restaurant, menu_day='T')
-        url = detail_url_employee(menu.id)
+        url = detail_url(menu.id)
 
         serializer = MenuDetailSerializer(menu)
+        res = self.client.get(url)
+
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_current_day_meny(self):
+        """Test that menu objects return for the day in url"""
+        MONDAY = 'M'
+        sample_menu(restaurant=self.restaurant, menu_day=MONDAY)
+        sample_menu(restaurant=self.restaurant, menu_day=MONDAY)
+
+        menus = Menu.objects.filter(menu_day=MONDAY).order_by('-id')
+        serializer = MenuSerializer(menus, many=True)
+
+        url = detail_url_current_day(MONDAY)
         res = self.client.get(url)
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)

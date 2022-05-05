@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext as _
 
-from .models import User, Restaurant, Menu
+from .models import User, Restaurant, Menu, Vote
 
 
 class UserAdmin(BaseUserAdmin):
@@ -28,3 +28,4 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(User, UserAdmin)
 admin.site.register(Restaurant)
 admin.site.register(Menu)
+admin.site.register(Vote)

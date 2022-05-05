@@ -1,4 +1,3 @@
-from distutils.command.upload import upload
 import uuid
 import os
 from django.db import models
@@ -63,6 +62,15 @@ class Menu(models.Model):
         default=MONDAY
     )
     image = models.ImageField(null=True, upload_to=menu_image_file_path)
+    votes = models.IntegerField(default=0)
 
     def __str__(self):
         return f'{self.restaurant.name}, {self.menu_day}'
+
+
+class Vote(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.user.email} - {self.menu.restaurant.name}, {self.menu.menu_day}'
