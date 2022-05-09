@@ -24,7 +24,7 @@ docker-compose up
 
 ### User
 
-#### Create a user
+#### Create a user:
 ```
 http://127.0.0.1:8000/api/user/create/
 ```
@@ -55,7 +55,7 @@ http://127.0.0.1:8000/api/menu/menu-list
 ```
 
 #### Current day menu:
-General:
+General ```url```:
 ```
 http://127.0.0.1:8000/api/menu/current-day-menu/day
 ```
@@ -66,23 +66,18 @@ http://127.0.0.1:8000/api/menu/current-day-menu/W
 This endpoint will list all menus for Wednesday.
 
 Menu day choices:
-
+```
 M - Monday
-
 T - Tuesday
-
 W - Wednesday
-
 TH - Thursday
-
 F - Friday
-
 S - Saturday
-
 SU - Sunday
+```
 
 #### Menu detail
-General:
+General ```url```:
 ```
 http://127.0.0.1:8000/api/menu/menu-list/id
 ```
@@ -98,7 +93,7 @@ http://127.0.0.1:8000/api/menu/menu-list/vote
 ```
 
 #### Top menu for the current day
-Top menu by voting results for a certain day. General:
+Top menu by voting results for a certain day. General ```url```:
 ```
 http://127.0.0.1:8000/api/menu/top-menu/menu_day
 ```
@@ -116,7 +111,7 @@ List and create:
 http://127.0.0.1:8000/api/menu/menus/
 ```
 Retrieve, update, delete.
-General:
+General ```url```:
 ```
 http://127.0.0.1:8000/api/menu/menus/menu_id/
 ```
