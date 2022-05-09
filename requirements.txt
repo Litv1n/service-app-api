@@ -3,3 +3,4 @@ djangorestframework
 psycopg2
 Pillow
 django-extensions
+drf-yasg
