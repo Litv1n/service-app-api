@@ -145,14 +145,11 @@ class PrivateMenuAPITests(TestCase):
 
     def test_top_menu(self):
         """Test returning top menu of the day"""
-        # superuser = create_superuser(
-        #     email='admin@testadmin.com',
-        #     password='adminpass'
-        # )
-        # self.client.force_authenticate(superuser)
         monday = 'M'
-        menu1 = Menu.objects.create(restaurant=self.restaurant, menu_day='M', votes=10)
-        menu2 = Menu.objects.create(restaurant=self.restaurant, menu_day='M', votes=5)
+        menu1 = Menu.objects.create(
+            restaurant=self.restaurant, menu_day='M', votes=10)
+        menu2 = Menu.objects.create(
+            restaurant=self.restaurant, menu_day='M', votes=5)
         menu3 = Menu.objects.create(restaurant=self.restaurant, menu_day='M')
 
         res = self.client.get(
@@ -168,4 +165,3 @@ class PrivateMenuAPITests(TestCase):
         self.assertIn(serializer1.data, res.data)
         self.assertNotIn(serializer2.data, res.data)
         self.assertNotIn(serializer3.data, res.data)
-
