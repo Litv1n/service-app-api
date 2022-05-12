@@ -9,7 +9,6 @@ from restaurant import serializers
 class RestaurantViewSet(viewsets.ModelViewSet):
     """CRUD restaurant objects"""
     authentication_classes = (TokenAuthentication, )
-    # permission_classes = (IsAdminUser, )
     queryset = Restaurant.objects.all()
     serializer_class = serializers.RestaurantSerializer
 

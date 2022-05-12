@@ -13,7 +13,6 @@ from . import serializers
 class MenuViewSet(viewsets.ModelViewSet):
     """Retrieve menu object"""
     authentication_classes = (TokenAuthentication, )
-    # permission_classes = (IsAdminUser, )
     queryset = Menu.objects.all()
     serializer_class = serializers.MenuSerializer
 
