@@ -10,13 +10,12 @@ class MenuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         fields = ('id', 'restaurant', 'menu_day', 'image', 'votes')
-        read_only_fields = ('id', 'votes')
+        read_only_fields = ('id', 'votes', 'image')
 
 
 class MenuDetailSerializer(MenuSerializer):
     """Serialize a menu detail"""
     restaurant = RestaurantSerializer(read_only=True)
-    votes = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Menu
