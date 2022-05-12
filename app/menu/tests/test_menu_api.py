@@ -16,12 +16,7 @@ VOTE_URL = reverse('menu:menu-vote')
 
 def detail_url(menu_id):
     """Return menu detail for the employee"""
-    return reverse('menu:menu-detail-view', args=[menu_id])
-
-
-def detail_url_current_day(current_day):
-    """Return current day menu detail url"""
-    return reverse('menu:current-day-menu', args=[current_day])
+    return reverse('menu:menu-detail', args=[menu_id])
 
 
 def sample_restaurant(name):
@@ -108,8 +103,7 @@ class PrivateMenuAPITests(TestCase):
 
     def test_menu_detail_employee(self):
         """Test detail menu view for employees"""
-        restaurant = sample_restaurant(name='IHOP')
-        menu = sample_menu(restaurant=restaurant, menu_day='T')
+        menu = sample_menu(restaurant=self.restaurant, menu_day='T')
         url = detail_url(menu.id)
 
         serializer = MenuDetailSerializer(menu)
@@ -127,8 +121,10 @@ class PrivateMenuAPITests(TestCase):
         menus = Menu.objects.filter(menu_day=MONDAY).order_by('-id')
         serializer = MenuSerializer(menus, many=True)
 
-        url = detail_url_current_day(MONDAY)
-        res = self.client.get(url)
+        res = self.client.get(
+            MENU_URL,
+            {'current-day-menu': MONDAY}
+        )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)

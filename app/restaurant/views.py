@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
@@ -6,21 +6,16 @@ from core.models import Restaurant
 from restaurant import serializers
 
 
-class BaseListAttr(generics.ListAPIView):
-    """Base view for listing objects"""
+class RestaurantViewSet(viewsets.ModelViewSet):
+    """CRUD restaurant objects"""
     authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAuthenticated, )
-
-
-class ListRestaurantView(BaseListAttr):
-    """List restaurant objects"""
+    # permission_classes = (IsAdminUser, )
     queryset = Restaurant.objects.all()
     serializer_class = serializers.RestaurantSerializer
 
-
-class CreateRestaurantView(generics.CreateAPIView):
-    """Create restaurant objects"""
-    authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAdminUser, )
-    queryset = Restaurant.objects.all()
-    serializer_class = serializers.RestaurantSerializer
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]

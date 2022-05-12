@@ -1,12 +1,14 @@
-from django.urls import path
-from .views import ListRestaurantView, CreateRestaurantView
+from django.urls import path, include
+from .views import RestaurantViewSet
 
+from rest_framework.routers import DefaultRouter
+
+
+router = DefaultRouter()
+router.register('restaurants', RestaurantViewSet)
 
 app_name = 'restaurant'
 
 urlpatterns = [
-    path('restaurant-list', ListRestaurantView.as_view(), name='restaurant-list'),
-    # For admin
-    path('restaurant-create',
-         CreateRestaurantView.as_view(), name='restaurant-create'),
+    path('', include(router.urls)),
 ]

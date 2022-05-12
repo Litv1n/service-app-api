@@ -7,29 +7,41 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Max, Q
 
 from core.models import Menu, Vote
-from restaurant.views import BaseListAttr
 from . import serializers
-
-
-class ListMenuView(BaseListAttr):
-    """List menu objects"""
-    queryset = Menu.objects.all()
-    serializer_class = serializers.MenuSerializer
-
-    def get_queryset(self):
-        """Return menus objects ordering by restaurant"""
-        return self.queryset.order_by('-id')
 
 
 class MenuViewSet(viewsets.ModelViewSet):
     """Retrieve menu object"""
     authentication_classes = (TokenAuthentication, )
-    permission_classes = (IsAdminUser, )
+    # permission_classes = (IsAdminUser, )
     queryset = Menu.objects.all()
     serializer_class = serializers.MenuSerializer
 
+    def get_permissions(self):
+
+        if self.action == 'list' or self.action == 'retrieve':
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+        return [permission() for permission in permission_classes]
+
     def get_queryset(self):
-        return self.queryset.order_by('-id')
+        current_day_menu = self.request.query_params.get('current-day-menu')
+        top_menu = self.request.query_params.get('top-menu')
+        queryset = self.queryset
+
+        if current_day_menu:
+            return queryset.filter(menu_day=current_day_menu).order_by('-id')
+        if top_menu:
+            max_votes = queryset.filter(
+                menu_day=top_menu
+            ).aggregate(Max('votes'))
+
+            return queryset.filter(
+                Q(menu_day=top_menu) & Q(votes=max_votes['votes__max'])
+            ).order_by('-id')[:1]
+
+        return queryset.order_by('-id')
 
     def get_serializer_class(self):
         if self.action == 'upload_image':
@@ -59,22 +71,6 @@ class MenuViewSet(viewsets.ModelViewSet):
         )
 
 
-class ListCurrentDayMenu(ListMenuView):
-    """List menus for the current day"""
-
-    def get_queryset(self):
-        day = self.kwargs['day']
-        return self.queryset.filter(menu_day=day).order_by('-id')
-
-
-class MenuEmployeeDetailView(generics.RetrieveAPIView):
-    """Menu detail view for employee"""
-    authentication_classes = (TokenAuthentication, )
-    permissions_classes = (IsAuthenticated, )
-    queryset = Menu.objects.all()
-    serializer_class = serializers.MenuDetailSerializer
-
-
 class VoteView(generics.CreateAPIView):
     """Create vote object"""
     authentication_classes = (TokenAuthentication, )
@@ -88,13 +84,3 @@ class VoteView(generics.CreateAPIView):
         menu = Menu.objects.get(id=menu_id)
         menu.votes += 1
         menu.save()
-
-
-class TopMenuCurrentDayView(BaseListAttr):
-    queryset = Menu.objects.all()
-    serializer_class = serializers.MenuDetailSerializer
-
-    def get_queryset(self):
-        day = self.kwargs['day']
-        max_votes = Menu.objects.filter(menu_day=day).aggregate(Max('votes'))
-        return self.queryset.filter(Q(votes=max_votes['votes__max']) & Q(menu_day=day)).order_by('-id')[0:1]

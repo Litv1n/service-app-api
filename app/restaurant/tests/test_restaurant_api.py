@@ -10,8 +10,8 @@ from core.models import Restaurant
 from restaurant.serializers import RestaurantSerializer
 
 
-LIST_RESTAURANT_URL = reverse('restaurant:restaurant-list')
-CREATE_RESTAURANT_URL = reverse('restaurant:restaurant-create')
+RESTAURANT_URL = reverse('restaurant:restaurant-list')
+# CREATE_RESTAURANT_URL = reverse('restaurant:restaurant-create')
 
 
 def create_superuser(email, password):
@@ -25,13 +25,8 @@ class PublicRestaurantsApiTests(TestCase):
         self.client = APIClient()
 
     def test_login_required_to_list(self):
-        """Test that login is required to access the list restaurant endpoint"""
-        res = self.client.get(LIST_RESTAURANT_URL)
-        self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_login_required_to_create(self):
-        """Test that login is required to access the create restaurant endpoint"""
-        res = self.client.get(CREATE_RESTAURANT_URL)
+        """Test that login is required to access the restaurant endpoint"""
+        res = self.client.get(RESTAURANT_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -51,7 +46,7 @@ class PrivateRestaurantAPITests(TestCase):
         Restaurant.objects.create(name='Arby"s')
         Restaurant.objects.create(name='Baton Rouge')
 
-        res = self.client.get(LIST_RESTAURANT_URL)
+        res = self.client.get(RESTAURANT_URL)
 
         restaurants = Restaurant.objects.all()
         serializer = RestaurantSerializer(restaurants, many=True)
@@ -64,7 +59,7 @@ class PrivateRestaurantAPITests(TestCase):
         payload = {
             'name': 'Baton Rouge'
         }
-        res = self.client.post(CREATE_RESTAURANT_URL, payload)
+        res = self.client.post(RESTAURANT_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -76,7 +71,7 @@ class PrivateRestaurantAPITests(TestCase):
             'name': 'Baton Rouge'
         }
 
-        self.client.post(CREATE_RESTAURANT_URL, payload)
+        self.client.post(RESTAURANT_URL, payload)
         exists = Restaurant.objects.filter(name=payload['name']).exists()
         self.assertTrue(exists)
 
@@ -86,5 +81,5 @@ class PrivateRestaurantAPITests(TestCase):
         self.client.force_authenticate(superuser)
         payload = {'name': ''}
 
-        res = self.client.post(CREATE_RESTAURANT_URL, payload)
+        res = self.client.post(RESTAURANT_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
