@@ -11,7 +11,6 @@ from restaurant.serializers import RestaurantSerializer
 
 
 RESTAURANT_URL = reverse('restaurant:restaurant-list')
-# CREATE_RESTAURANT_URL = reverse('restaurant:restaurant-create')
 
 
 def create_superuser(email, password):
@@ -24,7 +23,7 @@ class PublicRestaurantsApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-    def test_login_required_to_list(self):
+    def test_login_required(self):
         """Test that login is required to access the restaurant endpoint"""
         res = self.client.get(RESTAURANT_URL)
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)

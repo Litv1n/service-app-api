@@ -1,4 +1,3 @@
-from random import sample
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -37,8 +36,8 @@ class PublicMenuAPITests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-    def test_login_required_to_list(self):
-        """Test that authentication is required to list menu objects"""
+    def test_login_required(self):
+        """Test that authentication is required to access menu objects"""
         res = self.client.get(MENU_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -55,7 +54,6 @@ class PrivateMenuAPITests(TestCase):
         )
         self.client.force_authenticate(self.user)
         self.restaurant = sample_restaurant(name='Panda Express')
-        self.menu = sample_menu(restaurant=self.restaurant, menu_day='W')
 
     def test_retrieve_menus(self):
         """Test retrieving a list of menus"""
@@ -114,17 +112,60 @@ class PrivateMenuAPITests(TestCase):
 
     def test_current_day_meny(self):
         """Test that menu objects return for the day in url"""
-        MONDAY = 'M'
-        sample_menu(restaurant=self.restaurant, menu_day=MONDAY)
-        sample_menu(restaurant=self.restaurant, menu_day=MONDAY)
+        monday = 'M'
+        sample_menu(restaurant=self.restaurant, menu_day=monday)
+        sample_menu(restaurant=self.restaurant, menu_day=monday)
 
-        menus = Menu.objects.filter(menu_day=MONDAY).order_by('-id')
+        menus = Menu.objects.filter(menu_day=monday).order_by('-id')
         serializer = MenuSerializer(menus, many=True)
 
         res = self.client.get(
             MENU_URL,
-            {'current-day-menu': MONDAY}
+            {'current-day-menu': monday}
         )
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_menu_success(self):
+        """Test creating menu by admin"""
+        superuser = create_superuser(
+            email='admin@testadmin.com',
+            password='adminpass'
+        )
+        self.client.force_authenticate(superuser)
+        payload = {
+            'restaurant': self.restaurant.id,
+            'menu_day': 'W'
+        }
+
+        res = self.client.post(MENU_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+
+    def test_top_menu(self):
+        """Test returning top menu of the day"""
+        # superuser = create_superuser(
+        #     email='admin@testadmin.com',
+        #     password='adminpass'
+        # )
+        # self.client.force_authenticate(superuser)
+        monday = 'M'
+        menu1 = Menu.objects.create(restaurant=self.restaurant, menu_day='M', votes=10)
+        menu2 = Menu.objects.create(restaurant=self.restaurant, menu_day='M', votes=5)
+        menu3 = Menu.objects.create(restaurant=self.restaurant, menu_day='M')
+
+        res = self.client.get(
+            MENU_URL,
+            {'top-menu': monday}
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+
+        serializer1 = MenuSerializer(menu1)
+        serializer2 = MenuSerializer(menu2)
+        serializer3 = MenuSerializer(menu3)
+
+        self.assertIn(serializer1.data, res.data)
+        self.assertNotIn(serializer2.data, res.data)
+        self.assertNotIn(serializer3.data, res.data)
+
